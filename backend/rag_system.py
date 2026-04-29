@@ -113,7 +113,12 @@ class RAGSystem:
             Tuple of (response, sources list - empty for tool-based approach)
         """
         # Create prompt for the AI with clear instructions
-        prompt = f"""Answer this question about course materials: {query}"""
+        course_titles = self.vector_store.get_existing_course_titles()
+        courses_context = "\n".join(f"- {t}" for t in course_titles) if course_titles else "- (none loaded)"
+        prompt = f"""Answer this question about course materials: {query}
+
+Available courses:
+{courses_context}"""
         
         # Get conversation history if session exists
         history = None
