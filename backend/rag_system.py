@@ -5,7 +5,7 @@ from vector_store import VectorStore
 from ai_generator import AIGenerator
 from gemini_generator import GeminiGenerator
 from session_manager import SessionManager
-from search_tools import ToolManager, CourseSearchTool
+from search_tools import ToolManager, CourseSearchTool, CoursePageTool
 from models import Course, Lesson, CourseChunk
 
 class RAGSystem:
@@ -25,6 +25,8 @@ class RAGSystem:
         self.tool_manager = ToolManager()
         self.search_tool = CourseSearchTool(self.vector_store)
         self.tool_manager.register_tool(self.search_tool)
+        self.course_page_tool = CoursePageTool(self.vector_store)
+        self.tool_manager.register_tool(self.course_page_tool)
     
     def add_course_document(self, file_path: str) -> Tuple[Course, int]:
         """
