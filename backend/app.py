@@ -39,6 +39,7 @@ class QueryRequest(BaseModel):
     """Request model for course queries"""
     query: str
     session_id: Optional[str] = None
+    model: str = "claude"
 
 class QueryResponse(BaseModel):
     """Response model for course queries"""
@@ -63,7 +64,7 @@ async def query_documents(request: QueryRequest):
             session_id = rag_system.session_manager.create_session()
         
         # Process query using RAG system
-        answer, sources = rag_system.query(request.query, session_id)
+        answer, sources = rag_system.query(request.query, session_id, request.model)
         
         return QueryResponse(
             answer=answer,

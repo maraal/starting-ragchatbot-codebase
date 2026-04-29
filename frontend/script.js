@@ -5,9 +5,16 @@ const API_URL = '/api';
 let currentSessionId = null;
 
 // DOM elements
-let chatMessages, chatInput, sendButton, totalCourses, courseTitles;
+let chatMessages, chatInput, sendButton, totalCourses, courseTitles, modelSelect;
 
 // Theme management
+function initModelSelect() {
+    modelSelect.value = localStorage.getItem('selectedModel') || 'claude';
+    modelSelect.addEventListener('change', () => {
+        localStorage.setItem('selectedModel', modelSelect.value);
+    });
+}
+
 function initTheme() {
     const saved = localStorage.getItem('theme');
     const preferred = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
@@ -34,8 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
     sendButton = document.getElementById('sendButton');
     totalCourses = document.getElementById('totalCourses');
     courseTitles = document.getElementById('courseTitles');
+    modelSelect = document.getElementById('modelSelect');
 
     initTheme();
+    initModelSelect();
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
     setupEventListeners();
     createNewSession();
@@ -88,7 +97,8 @@ async function sendMessage() {
             },
             body: JSON.stringify({
                 query: query,
-                session_id: currentSessionId
+                session_id: currentSessionId,
+                model: modelSelect ? modelSelect.value : 'claude'
             })
         });
 

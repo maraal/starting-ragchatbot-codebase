@@ -3,6 +3,7 @@ import os
 from document_processor import DocumentProcessor
 from vector_store import VectorStore
 from ai_generator import AIGenerator
+from gemini_generator import GeminiGenerator
 from session_manager import SessionManager
 from search_tools import ToolManager, CourseSearchTool
 from models import Course, Lesson, CourseChunk
@@ -17,6 +18,7 @@ class RAGSystem:
         self.document_processor = DocumentProcessor(config.CHUNK_SIZE, config.CHUNK_OVERLAP)
         self.vector_store = VectorStore(config.CHROMA_PATH, config.EMBEDDING_MODEL, config.MAX_RESULTS)
         self.ai_generator = AIGenerator(config.ANTHROPIC_API_KEY, config.ANTHROPIC_MODEL)
+        self.gemini_generator = GeminiGenerator(config.GEMINI_API_KEY, config.GEMINI_MODEL)
         self.session_manager = SessionManager(config.MAX_HISTORY)
         
         # Initialize search tools
@@ -99,7 +101,7 @@ class RAGSystem:
         
         return total_courses, total_chunks
     
-    def query(self, query: str, session_id: Optional[str] = None) -> Tuple[str, List[str]]:
+    def query(self, query: str, session_id: Optional[str] = None, model: str = "claude") -> Tuple[str, List[str]]:
         """
         Process a user query using the RAG system with tool-based search.
         
@@ -118,8 +120,16 @@ class RAGSystem:
         if session_id:
             history = self.session_manager.get_conversation_history(session_id)
         
+        # Select generator based on model choice
+        if model == "gemini":
+            if not self.config.GEMINI_API_KEY:
+                raise ValueError("Gemini API key is not configured.")
+            generator = self.gemini_generator
+        else:
+            generator = self.ai_generator
+
         # Generate response using AI with tools
-        response = self.ai_generator.generate_response(
+        response = generator.generate_response(
             query=prompt,
             conversation_history=history,
             tools=self.tool_manager.get_tool_definitions(),
