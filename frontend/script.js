@@ -5,7 +5,7 @@ const API_URL = '/api';
 let currentSessionId = null;
 
 // DOM elements
-let chatMessages, chatInput, sendButton, totalCourses, courseTitles, modelSelect;
+let chatMessages, chatInput, sendButton, totalCourses, courseTitles, modelSelect, newChatBtn;
 
 // Theme management
 function initModelSelect() {
@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     totalCourses = document.getElementById('totalCourses');
     courseTitles = document.getElementById('courseTitles');
     modelSelect = document.getElementById('modelSelect');
+    newChatBtn = document.getElementById('newChatBtn');
 
     initTheme();
     initModelSelect();
@@ -60,6 +61,9 @@ function setupEventListeners() {
     });
     
     
+    // New chat button
+    newChatBtn.addEventListener('click', createNewSession);
+
     // Suggested questions
     document.querySelectorAll('.suggested-item').forEach(button => {
         button.addEventListener('click', (e) => {
@@ -186,6 +190,13 @@ function escapeHtml(text) {
 // Removed removeMessage function - no longer needed since we handle loading differently
 
 async function createNewSession() {
+    if (currentSessionId) {
+        try {
+            await fetch(`${API_URL}/session/${currentSessionId}`, { method: 'DELETE' });
+        } catch (e) {
+            // Non-critical — proceed with local reset regardless
+        }
+    }
     currentSessionId = null;
     chatMessages.innerHTML = '';
     addMessage('Welcome to the Course Materials Assistant! I can help you with questions about courses, lessons and specific content. What would you like to know?', 'assistant', null, true);
